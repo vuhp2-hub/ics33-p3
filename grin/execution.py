@@ -9,11 +9,13 @@ class ProgramState:
     - goto_labels is a dictionary that should enable the goto functionality to work.
     - return_stack is list designed like a stack to keep track of return values
     - output stores list of values being printed
+    - input_func enables the ability to test INNUM and INSTR
     """
-    def __init__(self, token_lines):
+    def __init__(self, token_lines, input_func=input):
         self.token_lines = token_lines
         self.ip = 0
         self.vars = {}
         self.goto_labels = {}
         self.return_stack = []
         self.output = []
+        self.input_func = input_func
