@@ -2,7 +2,7 @@
 
 from .token import GrinToken
 from .program_state import ProgramState
-from .utility import GrinRuntimeError, value_from_token
+from .utility import GrinRuntimeError, compare_values, value_from_token, resolve_jump_target
 
 class Statement:
     """Base class for all statements."""
@@ -109,3 +109,22 @@ class DivStatement(ArithmeticStatement):
 
         # otherwise float division
         return left / right
+
+class JumpStatement(Statement):
+    def __init__(self, target_token: GrinToken, condition=None):
+        self._target_token = target_token
+        # Optional conditional
+        self._condition = condition
+
+    def should_jump(self, state: ProgramState) -> bool:
+        """Resolve optional conditional clause if it exists"""
+        if self._condition is None:
+            return True
+
+        left_token, comp_op_token, right_token = self._condition
+        left_val = value_from_token(state, left_token)
+        right_val = value_from_token(state, right_token)
+        return compare_values(left_val, comp_op_token.kind(), right_val)
+
+    def destination(self, state) -> int:
+        return resolve_jump_target(state, self._target_token)

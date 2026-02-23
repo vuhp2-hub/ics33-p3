@@ -34,6 +34,9 @@ def _build_statements(token_lines: list[list[GrinToken]]) -> list[Statement]:
             statements.append(MultStatement(tokens[start + 1], tokens[start+2]))
         elif keyword == GrinTokenKind.DIV:
             statements.append(DivStatement(tokens[start + 1], tokens[start+2]))
+        elif keyword == GrinTokenKind.GOTO:
+            # statements.append(GoToStatement(tokens[start + 1], tokens[start+2]))
+            pass
         else:
             raise GrinRuntimeError('Not implemented')
     return statements
