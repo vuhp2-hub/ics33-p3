@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from grin.token import GrinToken
+from grin.token import GrinToken, GrinTokenKind
 
 class ProgramState:
     """
@@ -22,6 +22,21 @@ class ProgramState:
         self.output = []
         self.input_func = input_func
 
+def _get_starter_index(tokens: list[GrinToken]):
+    """A function that gets the token considering the possiblity of labels"""
+    if (len(tokens) >= 2
+        and tokens[0].kind() == GrinTokenKind.IDENTIFIER
+        and tokens[1].kind() == GrinTokenKind.COLON):
+        return 2
+    else:
+        return 0
+
 def execute(token_lines: list[list[GrinToken]], input_func=input):
     state = ProgramState(token_lines, input_func)
-    print('num of tokens:', str(len(state.token_lines)))
+
+    while 0 <= state.ip < len(state.token_lines):
+        tokens = state.token_lines[state.ip]
+        start = _get_starter_index(tokens)
+        keyword = tokens[start].kind()
+        print(keyword)
+        break
