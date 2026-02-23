@@ -50,3 +50,6 @@ class TestReadProgramLines(unittest.TestCase):
             sys.stdin = original_stdin
 
         self.assertEqual(lines, ["."])
+
+if __name__ == '__main__':
+    unittest.main()

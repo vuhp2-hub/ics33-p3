@@ -45,3 +45,6 @@ class TestLetPrint(unittest.TestCase):
     def test_labeled_line(self):
         out = _run_grin("START: LET A 3\nPRINT A\n.\n")
         self.assertEqual(out, ["3"])
+
+if __name__ == '__main__':
+    unittest.main()
