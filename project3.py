@@ -12,20 +12,26 @@
 
 import grin
 import sys
-import grin.parsing as parsing
+from grin.parsing import parse, GrinParseError
 
-
-def main() -> None:
+def read_program_lines() -> list[str]:
+    """Returning list of strings as the lines included in input"""
     lines = []
     for line in sys.stdin:
         stripped = line.rstrip('\n')
         lines.append(stripped)
         if stripped == '.':
             break
+    return lines
 
-    # Parsing
-    program = parsing.parse(lines)
-    print('Parsed successfully')
+def main() -> None:
+    try:
+        raw_lines = read_program_lines()
+        token_lines = list(parse(raw_lines))
+        print('Parsed successfully')
+        print(token_lines)
+    except GrinParseError as e:
+        print(str(e))
 if __name__ == '__main__':
     try:
         main()
