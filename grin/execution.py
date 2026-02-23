@@ -11,7 +11,9 @@ from .statements import (
     Statement,
     MultStatement,
     DivStatement,
-    GoToStatement
+    GoToStatement,
+    GoSubStatement,
+    ReturnStatement
 )
 from .program_state import ProgramState
 
@@ -52,6 +54,15 @@ def _build_statements(token_lines: list[list[GrinToken]]) -> list[Statement]:
             else:
                 condition = None
             statements.append(GoToStatement(tokens[start + 1], condition))
+        elif keyword == GrinTokenKind.GOSUB:
+            target = tokens[start + 1]
+            cond = None
+            if len(tokens) > start + 2:
+                cond = (tokens[start + 3], tokens[start + 4], tokens[start + 5])
+            statements.append(GoSubStatement(target, cond))
+
+        elif keyword == GrinTokenKind.RETURN:
+            statements.append(ReturnStatement())
         else:
             raise GrinRuntimeError('Not implemented')
     return statements

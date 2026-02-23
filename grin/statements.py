@@ -132,8 +132,24 @@ class JumpStatement(Statement):
 
 class GoToStatement(JumpStatement):
     """Implementation of GoTo"""
-    def execute(self, state) -> None:
+    def execute(self, state: ProgramState) -> None:
         if self.should_jump(state):
             state.ip = self.destination(state)
         else:
             state.ip += 1
+
+class GoSubStatement(JumpStatement):
+    """GoSub Execution Implementation"""
+    def execute(self, state: ProgramState) -> None:
+        if self.should_jump(state):
+            destination = self.destination(state)
+            state.return_stack.append(state.ip + 1)
+            state.ip = destination
+        else:
+            state.ip += 1
+
+class ReturnStatement(Statement):
+    def execute(self, state) -> None:
+        if not state.return_stack:
+            raise GrinRuntimeError("Runtime error: RETURN without GOSUB")
+        state.ip = state.return_stack.pop()
