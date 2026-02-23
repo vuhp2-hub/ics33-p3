@@ -64,6 +64,7 @@
               pytest
               coverage
               tkinter
+              ruff
 
               # Add whatever else you'd like here.
               # pkgs.basedpyright

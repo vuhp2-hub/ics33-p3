@@ -2,12 +2,20 @@
 
 from .token import GrinToken
 from .program_state import ProgramState
-from .utility import GrinRuntimeError, compare_values, value_from_token, resolve_jump_target
+from .utility import (
+    GrinRuntimeError,
+    compare_values,
+    value_from_token,
+    resolve_jump_target,
+)
+
 
 class Statement:
     """Base class for all statements."""
+
     def execute(self, state: ProgramState) -> None:
         raise NotImplementedError
+
 
 class LetStatement(Statement):
     def __init__(self, var_token: GrinToken, value_token: GrinToken):
@@ -18,6 +26,7 @@ class LetStatement(Statement):
         state.vars[self._var_token.text()] = value_from_token(state, self._value_token)
         state.ip += 1
 
+
 class PrintStatement(Statement):
     def __init__(self, value_token: GrinToken):
         self._value_token = value_token
@@ -27,13 +36,16 @@ class PrintStatement(Statement):
         state.output.append(str(value))
         state.ip += 1
 
+
 class EndStatement(Statement):
     def execute(self, state: ProgramState) -> None:
         # Jump ip out of range so the main loop ends cleanly
         state.ip = len(state.token_lines)
 
+
 class VariableUpdateStatement(Statement):
     """Shared structure: KEYWORD <identifier> <value>"""
+
     def __init__(self, var_token: GrinToken, value_token: GrinToken):
         self._var_token = var_token
         self._value_token = value_token
@@ -43,6 +55,7 @@ class VariableUpdateStatement(Statement):
 
     def operand_value(self, state):
         return value_from_token(state, self._value_token)
+
 
 class ArithmeticStatement(VariableUpdateStatement):
     def execute(self, state):
@@ -57,13 +70,15 @@ class ArithmeticStatement(VariableUpdateStatement):
     def apply(self, left, right):
         raise NotImplementedError
 
+
 class AddStatement(ArithmeticStatement):
     def apply(self, left, right):
         if isinstance(left, str) and isinstance(right, str):
             return left + right
         if isinstance(left, (int, float)) and isinstance(right, (int, float)):
             return left + right
-        raise GrinRuntimeError("Invalid types for ADD")
+        raise GrinRuntimeError('Invalid types for ADD')
+
 
 class SubStatement(ArithmeticStatement):
     def apply(self, left, right):
@@ -71,7 +86,8 @@ class SubStatement(ArithmeticStatement):
         if isinstance(left, (int, float)) and isinstance(right, (int, float)):
             return left - right
 
-        raise GrinRuntimeError("Runtime error: invalid types for SUB")
+        raise GrinRuntimeError('Runtime error: invalid types for SUB')
+
 
 class MultStatement(ArithmeticStatement):
     def apply(self, left, right):
@@ -82,26 +98,26 @@ class MultStatement(ArithmeticStatement):
         # string * int
         if isinstance(left, str) and isinstance(right, int):
             if right < 0:
-                raise GrinRuntimeError("Runtime error: negative string multiplication")
+                raise GrinRuntimeError('Runtime error: negative string multiplication')
             return left * right
 
         # int * string
         if isinstance(left, int) and isinstance(right, str):
             if left < 0:
-                raise GrinRuntimeError("Runtime error: negative string multiplication")
+                raise GrinRuntimeError('Runtime error: negative string multiplication')
             return right * left
 
-        raise GrinRuntimeError("Runtime error: invalid types for MULT")
+        raise GrinRuntimeError('Runtime error: invalid types for MULT')
 
 
 class DivStatement(ArithmeticStatement):
     def apply(self, left, right):
         # numeric / numeric only
         if not (isinstance(left, (int, float)) and isinstance(right, (int, float))):
-            raise GrinRuntimeError("Runtime error: invalid types for DIV")
+            raise GrinRuntimeError('Runtime error: invalid types for DIV')
 
         if right == 0 or right == 0.0:
-            raise GrinRuntimeError("Runtime error: division by zero")
+            raise GrinRuntimeError('Runtime error: division by zero')
 
         # int / int -> int (truncate toward 0)
         if isinstance(left, int) and isinstance(right, int):
@@ -110,8 +126,10 @@ class DivStatement(ArithmeticStatement):
         # otherwise float division
         return left / right
 
+
 class JumpStatement(Statement):
     """Parent class for GoTo and GoSub"""
+
     def __init__(self, target_token: GrinToken, condition=None):
         self._target_token = target_token
         # Optional conditional
@@ -130,16 +148,20 @@ class JumpStatement(Statement):
     def destination(self, state) -> int:
         return resolve_jump_target(state, self._target_token)
 
+
 class GoToStatement(JumpStatement):
     """Implementation of GoTo"""
+
     def execute(self, state: ProgramState) -> None:
         if self.should_jump(state):
             state.ip = self.destination(state)
         else:
             state.ip += 1
 
+
 class GoSubStatement(JumpStatement):
     """GoSub Execution Implementation"""
+
     def execute(self, state: ProgramState) -> None:
         if self.should_jump(state):
             destination = self.destination(state)
@@ -148,8 +170,9 @@ class GoSubStatement(JumpStatement):
         else:
             state.ip += 1
 
+
 class ReturnStatement(Statement):
     def execute(self, state) -> None:
         if not state.return_stack:
-            raise GrinRuntimeError("Runtime error: RETURN without GOSUB")
+            raise GrinRuntimeError('Runtime error: RETURN without GOSUB')
         state.ip = state.return_stack.pop()
