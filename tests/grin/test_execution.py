@@ -4,6 +4,7 @@ import unittest
 import grin.execution as execution
 from grin.parsing import parse
 from grin.utility import GrinRuntimeError
+from typing import Iterator, Optional
 
 
 class TestExecutionStarterIndex(unittest.TestCase):
@@ -22,10 +23,22 @@ def _empty_str():
     return ''
 
 
-def _run_grin(program_text: str) -> list[str]:
+def _iter(iterator: Iterator):
+    def closure():
+        return next(iterator)
+
+    return closure
+
+
+def _run_grin(program_text: str, inputs: list[str] | None = None) -> list[str]:
     raw_lines = program_text.splitlines()
     token_lines = list(parse(raw_lines))
-    return execution.execute(token_lines, input_func=_empty_str)
+
+    if inputs:
+        iterator = iter(inputs)
+        return execution.execute(token_lines, input_func=_iter(iterator))
+    else:
+        return execution.execute(token_lines, input_func=_empty_str)
 
 
 class TestLetPrint(unittest.TestCase):
@@ -275,6 +288,20 @@ class TestGoSubReturn(unittest.TestCase):
             'LET A 3\nGOSUB 3 IF A < 4\nPRINT "MAIN"\nEND\nPRINT "SUB"\nRETURN\n.\n'
         )
         self.assertEqual(out, ['SUB', 'MAIN'])
+
+
+class TestInstrStatement(unittest.TestCase):
+    def test_instr_reads_string_and_prints_it(self):
+        out = _run_grin('INSTR X\nPRINT X\n.\n', inputs=['Hello Boo!'])
+        self.assertEqual(out, ['Hello Boo!'])
+
+    def test_instr_allows_empty_string(self):
+        out = _run_grin('INSTR X\nPRINT X\n.\n', inputs=[''])
+        self.assertEqual(out, [''])
+
+    def test_instr_overwrites_existing_variable(self):
+        out = _run_grin('LET X "old"\nINSTR X\nPRINT X\n.\n', inputs=['new'])
+        self.assertEqual(out, ['new'])
 
 
 if __name__ == '__main__':

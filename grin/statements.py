@@ -176,3 +176,13 @@ class ReturnStatement(Statement):
         if not state.return_stack:
             raise GrinRuntimeError('Runtime error: RETURN without GOSUB')
         state.ip = state.return_stack.pop()
+
+
+class InstrStatement(Statement):
+    def __init__(self, var_token: GrinToken):
+        self._var_token = var_token
+
+    def execute(self, state: ProgramState) -> None:
+        line = state.input_func()
+        state.vars[self._var_token.text()] = line
+        state.ip += 1
