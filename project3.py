@@ -11,11 +11,23 @@
 # the 'grin' package, isolated in a way that allows you to unit test them.
 
 import grin
+import sys
+import grin.parsing as parsing
 
 
 def main() -> None:
-    pass
+    lines = []
+    for line in sys.stdin:
+        stripped = line.rstrip('\n')
+        lines.append(stripped)
+        if stripped == '.':
+            break
 
-
+    # Parsing
+    program = parsing.parse(lines)
+    print('Parsed successfully')
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(str(e))
