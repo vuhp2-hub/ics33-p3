@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from .errors import GrinRuntimeError
+from .utility import GrinRuntimeError
 from .token import GrinToken, GrinTokenKind
 from .statements import LetStatement, PrintStatement, EndStatement, Statement
 from .program_state import ProgramState
