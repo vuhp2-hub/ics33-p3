@@ -28,7 +28,9 @@ def main() -> None:
     try:
         raw_lines = read_program_lines()
         token_lines = list(parse(raw_lines))
-        execute(token_lines)
+        outputs = execute(token_lines)
+        for output in outputs:
+            print(output)
     except GrinParseError as e:
         print(str(e))
 if __name__ == '__main__':
