@@ -226,7 +226,7 @@ class TestGoto(unittest.TestCase):
             _run_grin('GOTO 999\n.\n')
 
 
-class TestGosubReturn(unittest.TestCase):
+class TestGoSubReturn(unittest.TestCase):
     def test_gosub_relative_and_return(self):
         # GOSUB 4 from line 2 jumps to line 6, sets A and B, RETURN goes back to line 3
         out = _run_grin(
