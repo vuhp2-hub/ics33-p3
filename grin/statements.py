@@ -186,3 +186,25 @@ class InstrStatement(Statement):
         line = state.input_func()
         state.vars[self._var_token.text()] = line
         state.ip += 1
+
+
+class InnumStatement(Statement):
+    def __init__(self, var_token: GrinToken):
+        self._var_token = var_token
+
+    def execute(self, state: ProgramState) -> None:
+        line = state.input_func()
+
+        if not line:
+            raise GrinRuntimeError('Runtime error: INNUM empty')
+
+        try:
+            if '.' not in line:
+                val = int(line)
+            else:
+                val = float(line)
+        except ValueError:
+            raise GrinRuntimeError('Runtime error: INNUM not a number')
+        else:
+            state.vars[self._var_token.text()] = val
+            state.ip += 1

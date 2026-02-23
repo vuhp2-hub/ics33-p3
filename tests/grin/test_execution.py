@@ -304,5 +304,43 @@ class TestInstrStatement(unittest.TestCase):
         self.assertEqual(out, ['new'])
 
 
+class TestInnumStatement(unittest.TestCase):
+    def test_innum_reads_integer(self):
+        out = _run_grin('INNUM X\nPRINT X\n.\n', inputs=['11'])
+        self.assertEqual(out, ['11'])
+
+    def test_innum_reads_negative_integer(self):
+        out = _run_grin('INNUM X\nPRINT X\n.\n', inputs=['-18'])
+        self.assertEqual(out, ['-18'])
+
+    def test_innum_strips_whitespace_integer(self):
+        out = _run_grin('INNUM X\nPRINT X\n.\n', inputs=['   42   '])
+        self.assertEqual(out, ['42'])
+
+    def test_innum_reads_float_with_digits(self):
+        out = _run_grin('INNUM X\nPRINT X\n.\n', inputs=['11.75'])
+        self.assertEqual(out, ['11.75'])
+
+    def test_innum_reads_float_with_trailing_dot(self):
+        out = _run_grin('INNUM X\nPRINT X\n.\n', inputs=['3.'])
+        self.assertEqual(out, ['3.0'])
+
+    def test_innum_strips_whitespace_float(self):
+        out = _run_grin('INNUM X\nPRINT X\n.\n', inputs=['   -3.0   '])
+        self.assertEqual(out, ['-3.0'])
+
+    def test_innum_invalid_input_raises(self):
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin('INNUM X\nPRINT X\n.\n', inputs=['abc'])
+
+    def test_innum_empty_input_raises(self):
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin('INNUM X\nPRINT X\n.\n', inputs=['   '])
+
+    def test_innum_multiple_dots_raises(self):
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin('INNUM X\nPRINT X\n.\n', inputs=['3.4.5'])
+
+
 if __name__ == '__main__':
     unittest.main()
