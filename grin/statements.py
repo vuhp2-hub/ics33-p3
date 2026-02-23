@@ -86,3 +86,40 @@ class SubStatement(ArithmeticStatement):
             return left - right
 
         raise GrinRuntimeError("Runtime error: invalid types for SUB")
+
+class MultStatement(ArithmeticStatement):
+    def apply(self, left, right):
+        # numeric * numeric
+        if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+            return left * right
+
+        # string * int
+        if isinstance(left, str) and isinstance(right, int):
+            if right < 0:
+                raise GrinRuntimeError("Runtime error: negative string multiplication")
+            return left * right
+
+        # int * string
+        if isinstance(left, int) and isinstance(right, str):
+            if left < 0:
+                raise GrinRuntimeError("Runtime error: negative string multiplication")
+            return right * left
+
+        raise GrinRuntimeError("Runtime error: invalid types for MULT")
+
+
+class DivStatement(ArithmeticStatement):
+    def apply(self, left, right):
+        # numeric / numeric only
+        if not (isinstance(left, (int, float)) and isinstance(right, (int, float))):
+            raise GrinRuntimeError("Runtime error: invalid types for DIV")
+
+        if right == 0 or right == 0.0:
+            raise GrinRuntimeError("Runtime error: division by zero")
+
+        # int / int -> int (truncate toward 0)
+        if isinstance(left, int) and isinstance(right, int):
+            return int(left / right)
+
+        # otherwise float division
+        return left / right

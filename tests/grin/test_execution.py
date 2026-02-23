@@ -84,5 +84,72 @@ class TestArithmeticSub(unittest.TestCase):
         with self.assertRaises(GrinRuntimeError):
             _run_grin(program)
 
+class TestArithmeticMult(unittest.TestCase):
+    def test_mult_int_int(self):
+        out = _run_grin("LET A 6\nMULT A 7\nPRINT A\n.\n")
+        self.assertEqual(out, ["42"])
+
+    def test_mult_float_int(self):
+        out = _run_grin("LET A 3.5\nMULT A 2\nPRINT A\n.\n")
+        self.assertEqual(out, ["7.0"])
+
+    def test_mult_string_int(self):
+        out = _run_grin('LET S "Boo"\nMULT S 3\nPRINT S\n.\n')
+        self.assertEqual(out, ["BooBooBoo"])
+
+    def test_mult_int_string(self):
+        out = _run_grin('LET A 3\nLET S "Boo"\nMULT A S\nPRINT A\n.\n')
+        # MULT A S updates A, so result should be "BooBooBoo"
+        self.assertEqual(out, ["BooBooBoo"])
+
+    def test_mult_negative_string_multiplier_raises_string_int(self):
+        program = 'LET S "Boo"\nMULT S -1\nPRINT S\n.\n'
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin(program)
+
+    def test_mult_negative_string_multiplier_raises_int_string(self):
+        program = 'LET A -2\nLET S "Boo"\nMULT A S\nPRINT A\n.\n'
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin(program)
+
+    def test_mult_invalid_types_raises(self):
+        program = 'LET S "Boo"\nMULT S 2.0\nPRINT S\n.\n'  # string * float not allowed
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin(program)
+
+
+class TestArithmeticDiv(unittest.TestCase):
+    def test_div_int_int_truncates_toward_zero_positive(self):
+        out = _run_grin("LET A 7\nDIV A 2\nPRINT A\n.\n")
+        self.assertEqual(out, ["3"])
+
+    def test_div_int_int_truncates_toward_zero_negative(self):
+        # IMPORTANT: trunc toward 0, so -7 / 2 -> -3
+        out = _run_grin("LET A -7\nDIV A 2\nPRINT A\n.\n")
+        self.assertEqual(out, ["-3"])
+
+    def test_div_float_float(self):
+        out = _run_grin("LET A 7.5\nDIV A 3.0\nPRINT A\n.\n")
+        self.assertEqual(out, ["2.5"])
+
+    def test_div_int_float(self):
+        out = _run_grin("LET A 7\nDIV A 2.0\nPRINT A\n.\n")
+        self.assertEqual(out, ["3.5"])
+
+    def test_div_by_zero_int_raises(self):
+        program = "LET A 7\nDIV A 0\nPRINT A\n.\n"
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin(program)
+
+    def test_div_by_zero_float_raises(self):
+        program = "LET A 7.0\nDIV A 0.0\nPRINT A\n.\n"
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin(program)
+
+    def test_div_invalid_types_raises(self):
+        program = 'LET S "Boo"\nDIV S 2\nPRINT S\n.\n'
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin(program)
+
 if __name__ == '__main__':
     unittest.main()
