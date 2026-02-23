@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from .errors import GrinRuntimeError
 from .token import GrinToken, GrinTokenKind
 from .statements import LetStatement, PrintStatement, EndStatement, Statement
 from .program_state import ProgramState
@@ -26,7 +27,7 @@ def build_statements(token_lines: list[list[GrinToken]]) -> list[Statement]:
         elif keyword == GrinTokenKind.END:
             statements.append(EndStatement())
         else:
-            raise AssertionError("Not implemented")
+            raise GrinRuntimeError('Not implemented')
     return statements
 
 def execute(token_lines: list[list[GrinToken]], input_func=input):
