@@ -226,5 +226,56 @@ class TestGoto(unittest.TestCase):
             _run_grin('GOTO 999\n.\n')
 
 
+class TestGosubReturn(unittest.TestCase):
+    def test_gosub_relative_and_return(self):
+        # GOSUB 4 from line 2 jumps to line 6, sets A and B, RETURN goes back to line 3
+        out = _run_grin(
+            'LET A 1\nGOSUB 4\nPRINT A\nPRINT B\nEND\nLET A 2\nLET B 3\nRETURN\n.\n'
+        )
+        self.assertEqual(out, ['2', '3'])
+
+    def test_gosub_label_and_return(self):
+        out = _run_grin(
+            'LET A 10\nGOSUB "CHUNK"\nPRINT A\nEND\nCHUNK: LET A 99\nRETURN\n.\n'
+        )
+        self.assertEqual(out, ['99'])
+
+    def test_nested_gosub_returns_in_lifo_order(self):
+        # Outer gosub jumps to OUTER, which gosubs to INNER, which returns to OUTER,
+        # then OUTER returns back to main.
+        out = _run_grin(
+            'PRINT "MAIN"\n'
+            'GOSUB "OUTER"\n'
+            'PRINT "DONE"\n'
+            'END\n'
+            'OUTER: PRINT "OUTER"\n'
+            'GOSUB "INNER"\n'
+            'PRINT "OUTER_AFTER"\n'
+            'RETURN\n'
+            'INNER: PRINT "INNER"\n'
+            'RETURN\n'
+            '.\n'
+        )
+        self.assertEqual(out, ['MAIN', 'OUTER', 'INNER', 'OUTER_AFTER', 'DONE'])
+
+    def test_return_without_gosub_is_error(self):
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin('RETURN\n.\n')
+
+    def test_gosub_if_false_does_not_jump_or_push(self):
+        # If the condition is false, the GOSUB should have no effect.
+        out = _run_grin(
+            'LET A 5\nGOSUB 2 IF A < 4\nPRINT "MAIN"\nEND\nPRINT "SUB"\nRETURN\n.\n'
+        )
+        self.assertEqual(out, ['MAIN'])
+
+    def test_gosub_if_true_jumps_and_return_works(self):
+        # If the condition is true, it should jump into subroutine and RETURN to main.
+        out = _run_grin(
+            'LET A 3\nGOSUB 3 IF A < 4\nPRINT "MAIN"\nEND\nPRINT "SUB"\nRETURN\n.\n'
+        )
+        self.assertEqual(out, ['SUB', 'MAIN'])
+
+
 if __name__ == '__main__':
     unittest.main()
