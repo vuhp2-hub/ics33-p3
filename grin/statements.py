@@ -44,3 +44,15 @@ class EndStatement(Statement):
     def execute(self, state: ProgramState) -> None:
         # Jump ip out of range so the main loop ends cleanly
         state.ip = len(state.token_lines)
+
+class VariableUpdateStatement(Statement):
+    """Shared structure: KEYWORD <identifier> <value>"""
+    def __init__(self, var_token: GrinToken, value_token: GrinToken):
+        self._var_token = var_token
+        self._value_token = value_token
+
+    def var_name(self) -> str:
+        return self._var_token.text()
+
+    def operand_value(self, state):
+        return _value_from_token(state, self._value_token)
