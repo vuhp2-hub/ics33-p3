@@ -151,5 +151,27 @@ class TestArithmeticDiv(unittest.TestCase):
         with self.assertRaises(GrinRuntimeError):
             _run_grin(program)
 
+class TestBuildGotoLabels(unittest.TestCase):
+    def test_single_label_index(self):
+        token_lines = list(parse([
+            "START: LET A 1",
+            "PRINT A",
+            "."
+        ]))
+        labels = execution._build_goto_labels(token_lines)
+        self.assertEqual(labels["START"], 0)
+
+    def test_multiple_labels(self):
+        token_lines = list(parse([
+            "LET A 1",
+            "L1: PRINT A",
+            "LET A 2",
+            "L2: PRINT A",
+            "."
+        ]))
+        labels = execution._build_goto_labels(token_lines)
+        self.assertEqual(labels["L1"], 1)
+        self.assertEqual(labels["L2"], 3)
+
 if __name__ == '__main__':
     unittest.main()
