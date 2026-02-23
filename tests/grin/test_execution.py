@@ -173,5 +173,96 @@ class TestBuildGotoLabels(unittest.TestCase):
         self.assertEqual(labels["L1"], 1)
         self.assertEqual(labels["L2"], 3)
 
+class TestGoto(unittest.TestCase):
+    # Basic relative jumps
+    def test_goto_forward_skips_line(self):
+        out = _run_grin(
+            "LET A 1\n"
+            "GOTO 2\n"
+            "LET A 99\n"
+            "PRINT A\n"
+            ".\n"
+        )
+        self.assertEqual(out, ["1"])
+
+    def test_goto_backward_loop(self):
+        out = _run_grin(
+            "LET A 3\n"
+            "PRINT A\n"
+            "SUB A 1\n"
+            "GOTO -2 IF A > 0\n"
+            ".\n"
+        )
+        self.assertEqual(out, ["3", "2", "1"])
+    def test_goto_label_jumps_to_labeled_line(self):
+        out = _run_grin(
+            "LET A 1\n"
+            "GOTO \"DEST\"\n"
+            "PRINT \"NO\"\n"
+            "DEST: PRINT A\n"
+            ".\n"
+        )
+        self.assertEqual(out, ["1"])
+
+    # Variable-based targets
+    def test_goto_target_from_variable_int(self):
+        out = _run_grin(
+            "LET OFFSET 2\n"
+            "LET A 1\n"
+            "GOTO OFFSET\n"
+            "PRINT \"NO\"\n"
+            "PRINT A\n"
+            ".\n"
+        )
+        self.assertEqual(out, ["1"])
+
+    def test_goto_target_from_variable_label(self):
+        out = _run_grin(
+            "LET L \"DEST\"\n"
+            "GOTO L\n"
+            "PRINT \"NO\"\n"
+            "DEST: PRINT \"YES\"\n"
+            ".\n"
+        )
+        self.assertEqual(out, ["YES"])
+
+    # Conditional jumps
+    def test_goto_if_true_jumps(self):
+        out = _run_grin(
+            "LET A 3\n"
+            "GOTO 2 IF A < 4\n"
+            "PRINT \"NO\"\n"
+            "PRINT \"YES\"\n"
+            ".\n"
+        )
+        self.assertEqual(out, ["YES"])
+
+    def test_goto_if_false_does_not_jump(self):
+        out = _run_grin(
+            "LET A 5\n"
+            "GOTO 2 IF A < 4\n"
+            "PRINT \"NO\"\n"
+            "PRINT \"YES\"\n"
+            ".\n"
+        )
+        self.assertEqual(out, ["NO", "YES"])
+
+    # Runtime errors
+    def test_goto_zero_is_error(self):
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin("GOTO 0\n.\n")
+
+    def test_goto_unknown_label_is_error(self):
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin('GOTO "MISSING"\n.\n')
+
+    def test_goto_target_variable_wrong_type_is_error(self):
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin("LET T 1.5\nGOTO T\n.\n")
+
+    def test_goto_out_of_bounds_is_error(self):
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin("GOTO 999\n.\n")
+
 if __name__ == '__main__':
     unittest.main()

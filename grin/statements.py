@@ -111,6 +111,7 @@ class DivStatement(ArithmeticStatement):
         return left / right
 
 class JumpStatement(Statement):
+    """Parent class for GoTo and GoSub"""
     def __init__(self, target_token: GrinToken, condition=None):
         self._target_token = target_token
         # Optional conditional
@@ -128,3 +129,11 @@ class JumpStatement(Statement):
 
     def destination(self, state) -> int:
         return resolve_jump_target(state, self._target_token)
+
+class GoToStatement(JumpStatement):
+    """Implementation of GoTo"""
+    def execute(self, state) -> None:
+        if self.should_jump(state):
+            state.ip = self.destination(state)
+        else:
+            state.ip += 1

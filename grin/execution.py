@@ -2,7 +2,17 @@
 
 from .utility import GrinRuntimeError
 from .token import GrinToken, GrinTokenKind
-from .statements import AddStatement, SubStatement, LetStatement, PrintStatement, EndStatement, Statement, MultStatement, DivStatement
+from .statements import (
+    AddStatement,
+    SubStatement,
+    LetStatement,
+    PrintStatement,
+    EndStatement,
+    Statement,
+    MultStatement,
+    DivStatement,
+    GoToStatement
+)
 from .program_state import ProgramState
 
 def _get_starter_index(tokens: list[GrinToken]):
@@ -35,8 +45,13 @@ def _build_statements(token_lines: list[list[GrinToken]]) -> list[Statement]:
         elif keyword == GrinTokenKind.DIV:
             statements.append(DivStatement(tokens[start + 1], tokens[start+2]))
         elif keyword == GrinTokenKind.GOTO:
-            # statements.append(GoToStatement(tokens[start + 1], tokens[start+2]))
-            pass
+            if len(tokens) > start + 2:
+                # start+2: IF
+                # 3, 4, 5 are operands and comparison operator
+                condition = (tokens[start+3], tokens[start+4], tokens[start+5])
+            else:
+                condition = None
+            statements.append(GoToStatement(tokens[start + 1], condition))
         else:
             raise GrinRuntimeError('Not implemented')
     return statements
