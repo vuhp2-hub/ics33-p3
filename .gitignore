@@ -3,6 +3,11 @@
 /pyvenv.cfg
 /.idea
 __pycache__
+*.db
+*.db-journal
+/venv
 *.bundle
 *.coverage
-/venv
+.direnv/
+.envrc
+flake.lock
