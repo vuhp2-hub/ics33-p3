@@ -10,9 +10,9 @@
 # offloading as much of the complexity as you can into additional modules in
 # the 'grin' package, isolated in a way that allows you to unit test them.
 
-import grin
 import sys
 from grin.parsing import parse, GrinParseError
+from grin.execution import execute
 
 def read_program_lines() -> list[str]:
     """Returning list of strings as the lines included in input"""
@@ -28,8 +28,7 @@ def main() -> None:
     try:
         raw_lines = read_program_lines()
         token_lines = list(parse(raw_lines))
-        print('Parsed successfully')
-        print(token_lines)
+        execute(token_lines)
     except GrinParseError as e:
         print(str(e))
 if __name__ == '__main__':

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from grin.token import GrinToken
+
 class ProgramState:
     """
     Keeps track of the program's state
@@ -11,7 +13,7 @@ class ProgramState:
     - output stores list of values being printed
     - input_func enables the ability to test INNUM and INSTR
     """
-    def __init__(self, token_lines, input_func=input):
+    def __init__(self, token_lines: list[list[GrinToken]], input_func=input):
         self.token_lines = token_lines
         self.ip = 0
         self.vars = {}
@@ -19,3 +21,7 @@ class ProgramState:
         self.return_stack = []
         self.output = []
         self.input_func = input_func
+
+def execute(token_lines: list[list[GrinToken]], input_func=input):
+    state = ProgramState(token_lines, input_func)
+    print('num of tokens:', str(len(state.token_lines)))
