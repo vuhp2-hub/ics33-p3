@@ -3,6 +3,7 @@
 import unittest
 import grin.execution as execution
 from grin.parsing import parse
+from grin.utility import GrinRuntimeError
 
 class TestExecutionStarterIndex(unittest.TestCase):
     def test_get_starter_index_no_label(self):
@@ -45,6 +46,43 @@ class TestLetPrint(unittest.TestCase):
     def test_labeled_line(self):
         out = _run_grin("START: LET A 3\nPRINT A\n.\n")
         self.assertEqual(out, ["3"])
+
+class TestArithmeticAdd(unittest.TestCase):
+    def test_add_int_int(self):
+        out = _run_grin("LET A 4\nADD A 3\nPRINT A\n.\n")
+        self.assertEqual(out, ["7"])
+
+    def test_add_int_float(self):
+        out = _run_grin("LET A 4\nADD A 2.5\nPRINT A\n.\n")
+        self.assertEqual(out, ["6.5"])
+
+    def test_add_float_int(self):
+        out = _run_grin("LET A 4.5\nADD A 2\nPRINT A\n.\n")
+        self.assertEqual(out, ["6.5"])
+
+    def test_add_string_string(self):
+        out = _run_grin('LET S "Boo"\nADD S "lean"\nPRINT S\n.\n')
+        self.assertEqual(out, ["Boolean"])
+
+    def test_add_invalid_types_raises(self):
+        # int + string not allowed
+        program = 'LET A 1\nADD A "x"\nPRINT A\n.\n'
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin(program)
+
+class TestArithmeticSub(unittest.TestCase):
+    def test_sub_int_int(self):
+        out = _run_grin("LET A 10\nSUB A 3\nPRINT A\n.\n")
+        self.assertEqual(out, ["7"])
+
+    def test_sub_float_float(self):
+        out = _run_grin("LET A 10.5\nSUB A 3.0\nPRINT A\n.\n")
+        self.assertEqual(out, ["7.5"])
+
+    def test_sub_invalid_types_raises(self):
+        program = 'LET S "hi"\nSUB S 1\nPRINT S\n.\n'
+        with self.assertRaises(GrinRuntimeError):
+            _run_grin(program)
 
 if __name__ == '__main__':
     unittest.main()

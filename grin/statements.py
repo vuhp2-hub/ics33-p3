@@ -3,6 +3,7 @@
 from .token import GrinToken
 from .program_state import ProgramState
 from .token import GrinTokenKind
+from .utility import GrinRuntimeError
 
 def _value_from_token(state: ProgramState, value_token: GrinToken):
     kind = value_token.kind()
@@ -56,3 +57,32 @@ class VariableUpdateStatement(Statement):
 
     def operand_value(self, state):
         return _value_from_token(state, self._value_token)
+
+class ArithmeticStatement(VariableUpdateStatement):
+    def execute(self, state):
+        name = self.var_name()
+        left = state.vars.get(name, 0)
+        right = self.operand_value(state)
+
+        result = self.apply(left, right)
+        state.vars[name] = result
+        state.ip += 1
+
+    def apply(self, left, right):
+        raise NotImplementedError
+
+class AddStatement(ArithmeticStatement):
+    def apply(self, left, right):
+        if isinstance(left, str) and isinstance(right, str):
+            return left + right
+        if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+            return left + right
+        raise GrinRuntimeError("Invalid types for ADD")
+
+class SubStatement(ArithmeticStatement):
+    def apply(self, left, right):
+        # numeric - numeric only
+        if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+            return left - right
+
+        raise GrinRuntimeError("Runtime error: invalid types for SUB")
