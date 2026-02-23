@@ -48,7 +48,6 @@ def _build_goto_labels(token_lines: list[list[GrinToken]]) -> dict[str, int]:
         ):
             labels[tokens[0].text()] = index
     return labels
-    
 
 def execute(token_lines: list[list[GrinToken]], input_func=input):
     """Executes gin tokens with optional input_func parameter for testing INNUM, INSTR"""
