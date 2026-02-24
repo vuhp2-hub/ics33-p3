@@ -14,6 +14,7 @@ import sys
 from grin.parsing import parse, GrinParseError
 from grin.execution import execute
 
+
 def read_program_lines() -> list[str]:
     """Returning list of strings as the lines included in input"""
     lines = []
@@ -24,15 +25,16 @@ def read_program_lines() -> list[str]:
             break
     return lines
 
+
 def main() -> None:
     try:
         raw_lines = read_program_lines()
         token_lines = list(parse(raw_lines))
-        outputs = execute(token_lines)
-        for output in outputs:
-            print(output)
+        execute(token_lines, input_func=input, output_func=print)
     except GrinParseError as e:
         print(str(e))
+
+
 if __name__ == '__main__':
     try:
         main()

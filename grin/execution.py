@@ -17,6 +17,7 @@ from .statements import (
     InstrStatement,
     InnumStatement,
 )
+from typing import Callable
 from .program_state import ProgramState
 
 
@@ -90,9 +91,13 @@ def _build_goto_labels(token_lines: list[list[GrinToken]]) -> dict[str, int]:
     return labels
 
 
-def execute(token_lines: list[list[GrinToken]], input_func=input):
+def execute(
+    token_lines: list[list[GrinToken]],
+    input_func: Callable = input,
+    output_func: Callable | None = None,
+):
     """Executes gin tokens with optional input_func parameter for testing INNUM, INSTR"""
-    state = ProgramState(token_lines, input_func)
+    state = ProgramState(token_lines, input_func, output_func)
 
     statements = _build_statements(token_lines)
     state.goto_labels = _build_goto_labels(token_lines)

@@ -4,7 +4,7 @@ import unittest
 import grin.execution as execution
 from grin.parsing import parse
 from grin.utility import GrinRuntimeError
-from typing import Iterator, Optional
+from typing import Iterator
 
 
 class TestExecutionStarterIndex(unittest.TestCase):
@@ -34,11 +34,15 @@ def _run_grin(program_text: str, inputs: list[str] | None = None) -> list[str]:
     raw_lines = program_text.splitlines()
     token_lines = list(parse(raw_lines))
 
+    output: list[str] = []
     if inputs:
         iterator = iter(inputs)
-        return execution.execute(token_lines, input_func=_iter(iterator))
+        execution.execute(
+            token_lines, input_func=_iter(iterator), output_func=output.append
+        )
     else:
-        return execution.execute(token_lines, input_func=_empty_str)
+        execution.execute(token_lines, input_func=_empty_str, output_func=output.append)
+    return output
 
 
 class TestLetPrint(unittest.TestCase):

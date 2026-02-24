@@ -33,7 +33,10 @@ class PrintStatement(Statement):
 
     def execute(self, state: ProgramState) -> None:
         value = value_from_token(state, self._value_token)
-        state.output.append(str(value))
+        text = str(value)
+        state.output.append(text)
+        if state.output_func is not None:
+            state.output_func(text)
         state.ip += 1
 
 
